@@ -1,8 +1,4 @@
-using MasterPlanProject_V2.MVC.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-
-namespace MasterPlanProject_V2.MVC.Controllers
+namespace MasterPlanProject.Mvc.Controllers
 {
 	public class HomeController : Controller
 	{

@@ -1,0 +1,42 @@
+﻿@using ContractLibrary
+@model ResultApiModel
+@inject IWebHostEnvironment env
+
+@{
+	ViewData["Title"] = "Le località più belle della puglia";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Le località più belle della puglia</h1>
+
+@if (Model.IsSucces == false)
+{
+	if (env.IsDevelopment())
+	{
+		<span>Errore:  <b>@string.Join(" ", @Model.ListaErrori)</b></span>
+	}
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Area</th>
+				<th>Località</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (LocalitaPugliaDTO item in ((List<LocalitaPugliaDTO>)Model.ValoreRitornato).OrderBy(k => k.Area).ThenBy(k => k.Localita))
+			{
+				<tr>
+					<td>
+						@item.Area
+					</td>
+					<td>
+						@item.Localita
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

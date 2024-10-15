@@ -1,0 +1,15 @@
+global using AutoMapper;
+global using ContractLibrary;
+global using MasterPlanProject.Mvc.Models;
+global using MasterPlanProject.Mvc.Services.IServices;
+global using MasterPlanProject.Mvc.Services;
+global using Microsoft.AspNetCore.Authentication.Cookies;
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Mvc;
+global using Newtonsoft.Json;
+global using System.Diagnostics;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Net.Http.Headers;
+global using System.Security.Claims;
+global using System.Text;

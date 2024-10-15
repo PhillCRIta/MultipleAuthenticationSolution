@@ -1,4 +1,4 @@
-namespace MasterPlanProject_V2.MVC.Models
+namespace MasterPlanProject.Mvc.Models
 {
 	public class ErrorViewModel
 	{

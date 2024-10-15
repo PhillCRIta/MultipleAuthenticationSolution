@@ -16,7 +16,7 @@
         }
 
         [HttpGet("GetLocalita")]
-		[Authorize]
+		[Authorize(Roles = "admin")]
 		[Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
