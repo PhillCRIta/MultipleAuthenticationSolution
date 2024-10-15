@@ -1,0 +1,28 @@
+@rootUrl = https://localhost:7001
+
+###LOCALITA PUGLIA GET AUTHENTICATED
+GET {{rootUrl}}/api/BellezzePuglia/GetLocalita
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkJhZGR5IiwibmFtZWlkIjoiYjcyMTdiM2ItYTcyYy00ZjFjLTgzNTEtZWI0OWI1YmQzYmE1Iiwicm9sZSI6ImFkbWluIiwiZ2VuZGVyIjoibWFzY2hpbyIsImVtYWlsIjoiQmFkZHlAbXlkb21haW4uY29tIiwibmJmIjoxNzI5MDAzMTExLCJleHAiOjE3MjkwODk1MTEsImlhdCI6MTcyOTAwMzExMX0.sZi5Dw8gxAtCYnx9bwgPnnBq9z-p-vyysVKwYDNUUzU
+
+###LOCALITA PUGLIA GET UNAUTHENTICATED
+GET {{rootUrl}}/api/BellezzePuglia/GetLocalitaNoAuth
+
+
+
+
+###LOGIN
+POST {{rootUrl}}/api/UserAuth/login
+Content-Type: application/json
+{
+  "username": "Baddy",
+  "password": "Baddy2"
+}
+###REGISTRAZIONE
+POST {{rootUrl}}/api/UserAuth/register
+Content-Type: application/json
+{
+  "name": "Baddy",
+  "username": "Baddy",
+  "password": "Baddy2",
+  "role": "admin"
+}
