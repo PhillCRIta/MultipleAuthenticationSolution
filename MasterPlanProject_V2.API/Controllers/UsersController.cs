@@ -22,14 +22,14 @@
 		{
 			try
 			{
-				LoginResponseDTO loginResponse = await userRepo.LoginAsync(model);
-				if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token))
+				TokenDTO tokenDto = await userRepo.LoginAsync(model);
+				if (tokenDto  == null || string.IsNullOrEmpty(tokenDto.AccessToken))
 				{
 					ModelState.AddModelError("ListMessage", "Invalid credential2");
 					ModelState.AddModelError("ListMessage", "Messaggio2");
 					return BadRequest(ModelState);
 				}
-				response.Result = loginResponse;
+				response.Result = tokenDto;
 				response.StatusCode = HttpStatusCode.OK;
 				return Ok(response);
 			}

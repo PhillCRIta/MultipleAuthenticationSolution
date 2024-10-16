@@ -55,7 +55,7 @@
 			}
 			return result;
 		}
-		public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
+		public async Task<TokenDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
 		{
 			bool result = false;
 			string Id = "";
@@ -97,27 +97,21 @@
 			}
 			if (result == false)
 			{
-				return new LoginResponseDTO()
+				return new TokenDTO()
 				{
-					Token = "",
-					User = null
+					AccessToken = ""
 				};
 			}
-			LoginResponseDTO response = GenerazioneToken(Id, Name, roles, userDTO, Email);
+			TokenDTO response = GenerazioneToken(Id, Name, roles, userDTO, Email);
 			return response;
 		}
-		private LoginResponseDTO GenerazioneToken(string Id, string Name, List<string> Roles, LocalUsersDTO userDTO, string email, string sesso = "maschio")
+		private TokenDTO GenerazioneToken(string Id, string Name, List<string> Roles, LocalUsersDTO userDTO, string email, string sesso = "maschio")
 		{
-			//VA GENERATO IL JWT TOKEN
-			//HANDLER >> GESTORE
-			Byte[] key = Encoding.ASCII.GetBytes(secret);//converte stringa in bytearray
-														 //token descriptor > contiene ognicosa che riguarda i claims dentro il token (ID, nome, ruole e altri elementi custom)
+			Byte[] key = Encoding.ASCII.GetBytes(secret);
 			JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-			//gestisco fuori l'array dei claim in quanto uso i ruoli dinamici
 			ClaimsIdentity ci = new();
 			ci.AddClaim(new Claim(ClaimTypes.Name, Name));
 			ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, Id));
-			//ci.AddClaim(new Claim(ClaimTypes.Gender, sesso));
 			foreach (string role in Roles)
 			{
 				ci.AddClaim(new Claim(ClaimTypes.Role, role));
@@ -127,29 +121,17 @@
 			genericClaims.Add(ClaimTypes.Email, email);
 			SecurityTokenDescriptor tokenDesriptor = new SecurityTokenDescriptor
 			{
-				//CONFIGURAZIONE MINIMA
-				//nel token inserisco i vari claims raccolti dentro il claimidentity
-				/*Subject = new ClaimsIdentity(new Claim[]
-				{
-					new Claim(ClaimTypes.Name, Id),
-					new Claim(ClaimTypes.Role, Role),
-					new Claim(ClaimTypes.Gender, sesso)
-				}),*/
-				Subject = ci, //generato in modo dinamico
-							  //scadenza
+				Subject = ci, 
 				Claims = genericClaims,
 				Expires = DateTime.UtcNow.AddDays(1),
-				//aggiungo la firma con la chiave impostata
 				SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 			};
 			SecurityToken token = tokenHandler.CreateToken(tokenDesriptor);
-			//oggetto di ritorno
-			LoginResponseDTO response = new LoginResponseDTO()
+			TokenDTO tokenDto = new TokenDTO()
 			{
-				Token = tokenHandler.WriteToken(token),//serializza il token generato prima in un formato scambiabile
-				User = userDTO
+				AccessToken = tokenHandler.WriteToken(token)
 			};
-			return response;
+			return tokenDto;
 		}
 		public async Task<LocalUsersDTO> RegisterAsync(RegistrationRequestDTO registrationRequestDTO)
 		{

@@ -141,7 +141,7 @@ namespace MasterPlanProject.WebApi
 						return Task.CompletedTask;
 					}
 				};
-				opt.MapInboundClaims = true;
+				//opt.MapInboundClaims = true;
 			});
 			var app = builder.Build();
 

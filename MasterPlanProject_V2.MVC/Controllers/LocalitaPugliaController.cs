@@ -14,7 +14,7 @@
 		public async Task<IActionResult> IndexLocalita()
 		{
 			List<LocalitaPugliaDTO> listaLocalita = new();
-			APIResponse response = await pugliaService.GetAllAsync<APIResponse>(HttpContext.Session.GetString(Constant.SessioneToken));
+			APIResponse response = await pugliaService.GetAllAsync<APIResponse>(HttpContext.Session.GetString(Constant.AccessTokenSession));
 			if (response != null && response.IsSucces)
 			{
 				listaLocalita = JsonConvert.DeserializeObject<List<LocalitaPugliaDTO>>(Convert.ToString(response.Result));

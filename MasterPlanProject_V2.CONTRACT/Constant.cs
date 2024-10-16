@@ -8,7 +8,7 @@ namespace ContractLibrary
 {
 	public static class Constant
 	{
-		public static string SessioneToken { get; set; } = "JWTToken";//il nome della sessione usato nella parte web
+		public static string AccessTokenSession { get; set; } = "JWTToken"; 
 
 		public enum ApiType { GET, POST, PUT, DELETE }
 

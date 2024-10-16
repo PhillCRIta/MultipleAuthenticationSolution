@@ -29,8 +29,8 @@
 							<a class="nav-link text-dark" asp-area="" asp-controller="LocalitaPuglia" asp-action="IndexLocalita">Località Puglia</a>
 						</li>
 
-						@* @if (contAccessor.HttpContext.Session.GetString(Constant.SessioneToken) != null &&
-											String.IsNullOrEmpty(contAccessor.HttpContext.Session.GetString(Constant.SessioneToken).ToString()) == false
+						@* @if (contAccessor.HttpContext.Session.GetString(Constant.AccessTokenSession) != null &&
+											String.IsNullOrEmpty(contAccessor.HttpContext.Session.GetString(Constant.AccessTokenSession).ToString()) == false
 											) *@
 						@if (User.Identity.IsAuthenticated)
 						{

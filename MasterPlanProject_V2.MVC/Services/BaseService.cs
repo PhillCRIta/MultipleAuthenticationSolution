@@ -1,20 +1,22 @@
-﻿namespace MasterPlanProject.Mvc.Services
+﻿using MasterPlanProject_V2.MVC.Services.IServices;
+
+namespace MasterPlanProject.Mvc.Services
 {
 	public class BaseService : IBaseService
 	{
 		private readonly IHttpClientFactory httpClient;
-		private readonly string nameClient;
+		private readonly ITokenProvider tokenProvider;
 
 		public APIResponse ResponseModel { get; set; }
 
-		public BaseService(IHttpClientFactory httpClient, string nameClient)
+		public BaseService(IHttpClientFactory httpClient,  ITokenProvider tokenProvider)
 		{
 			this.ResponseModel = new();
 			this.httpClient = httpClient;
-			this.nameClient = nameClient;
+			this.tokenProvider = tokenProvider;
 		}
 
-		public async Task<T> SendAsync<T>(APIRequest apiRequest)
+		public async Task<T> SendAsync<T>(APIRequest apiRequest, string nameClient, bool withBearer = true)
 		{
 			try
 			{
@@ -41,9 +43,10 @@
 						message.Method = HttpMethod.Get;
 						break;
 				}
-				if (string.IsNullOrEmpty(apiRequest.Token)==false)
+				if (tokenProvider.GetToken()!= null && withBearer == true)
 				{
-					client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Token);
+					TokenDTO token = tokenProvider.GetToken();
+					client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
 				}
 				HttpResponseMessage apiResponse = null;
 				apiResponse = await client.SendAsync(message);

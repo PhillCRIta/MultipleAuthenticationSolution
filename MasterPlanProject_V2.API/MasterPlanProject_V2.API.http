@@ -14,8 +14,8 @@ GET {{rootUrl}}/api/BellezzePuglia/GetLocalitaNoAuth
 POST {{rootUrl}}/api/UserAuth/login
 Content-Type: application/json
 {
-  "username": "Baddy",
-  "password": "Baddy2"
+  "username": "Liana",
+  "password": "Liana2"
 }
 ###REGISTRAZIONE
 POST {{rootUrl}}/api/UserAuth/register

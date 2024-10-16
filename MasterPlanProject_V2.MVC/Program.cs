@@ -1,3 +1,6 @@
+using MasterPlanProject_V2.MVC.Services;
+using MasterPlanProject_V2.MVC.Services.IServices;
+
 namespace MasterPlanProject.Mvc
 {
 	public class Program
@@ -11,8 +14,12 @@ namespace MasterPlanProject.Mvc
 			builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 			builder.Services.AddHttpClient<ILocalitaPugliaService, LocalitaPugliaService>();
+			builder.Services.AddHttpClient<IAuthService, AuthService>();
+			builder.Services.AddScoped<IBaseService, BaseService>();
+
 			builder.Services.AddScoped<ILocalitaPugliaService, LocalitaPugliaService>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
+			builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 
 			//aggiungo la gestione della sessione per memorizzare il token e non doverlo recuperare tutte le volte
 			builder.Services.AddDistributedMemoryCache();
