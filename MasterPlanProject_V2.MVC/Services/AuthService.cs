@@ -31,5 +31,15 @@
 				Url = localitaPugliaServiceURL+ "/api/UserAuth/register"
 			}, "AuthServiceClient", false);
 		}
+		public Task<T> LogoutAsync<T>(TokenDTO objLogout)
+		{
+			return baseService.SendAsync<T>(new APIRequest()
+			{
+				ApiType = Constant.ApiType.POST,
+				Data = objLogout,
+				Url = localitaPugliaServiceURL + "/api/UserAuth/revoke"
+			}, "AuthServiceClient");
+		}
+
 	}
 }

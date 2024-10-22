@@ -93,6 +93,7 @@ namespace MasterPlanProject.Mvc.Controllers
 			//quando l'utente esce devo cancellare tutte le sessioni, compreso il token
 			await HttpContext.SignOutAsync();
 			//HttpContext.Session.SetString(Constant.AccessTokenSession, "");
+			await authService.LogoutAsync<APIResponse>(tokenProvider.GetToken());
 			tokenProvider.ClearToken();
 			return RedirectToAction("Index", "Home");
 		}

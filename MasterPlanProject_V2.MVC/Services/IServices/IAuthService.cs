@@ -4,5 +4,6 @@
 	{
 		Task<T> LoginAsync<T>(LoginRequestDTO objLogin);
 		Task<T> RegisterAsync<T>(RegistrationRequestDTO objRegister);
+		Task<T> LogoutAsync<T>(TokenDTO objLogout);
 	}
 }

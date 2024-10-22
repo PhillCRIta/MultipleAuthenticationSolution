@@ -64,7 +64,6 @@ namespace MasterPlanProject.WebApi.Controllers
 			response.IsSucces = true;
 			return Ok(response);
 		}
-
 		[HttpPost("refresh")]
 		public async Task<IActionResult> GetNewTokenFromRefreshToken([FromBody] TokenDTO tokenDto)
 		{
@@ -90,6 +89,20 @@ namespace MasterPlanProject.WebApi.Controllers
 				response.ErrorMessages.Add("Invalid input");
 				return BadRequest(response);
 			}
+		}
+		[HttpPost("revoke")]
+		public async Task<IActionResult> RevokeRefreshToken([FromBody] TokenDTO tokenDTO)
+		{
+			if (ModelState.IsValid)
+			{
+				await userRepo.RevokerefreshToken(tokenDTO);
+				response.StatusCode = HttpStatusCode.OK;
+				response.IsSucces = true;
+				return Ok(response);
+			}
+			response.IsSucces = false;
+			response.Result = "Invalid input";
+			return BadRequest(response);
 		}
 	}
 }

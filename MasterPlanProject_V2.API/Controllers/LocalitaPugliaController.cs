@@ -45,10 +45,10 @@
 		[ProducesResponseType(StatusCodes.Status403Forbidden)]
 		public async Task<ActionResult<APIResponse>> GetLocalitaNoAuth()
 		{
-			Debug.WriteLine(HttpContext.Request);
-			Debug.WriteLine(HttpContext.User);
-			Debug.WriteLine(User?.Identity?.Name);
-			Debug.WriteLine(User.Identity.IsAuthenticated);
+			//Debug.WriteLine(HttpContext.Request);
+			//Debug.WriteLine(HttpContext.User);
+			//Debug.WriteLine(User?.Identity?.Name);
+			//Debug.WriteLine(User.Identity.IsAuthenticated);
 			try
 			{
 				IEnumerable<LocalitaPuglia> listaLocalita = await dbLocalita.GetAllLocalitaAsync();

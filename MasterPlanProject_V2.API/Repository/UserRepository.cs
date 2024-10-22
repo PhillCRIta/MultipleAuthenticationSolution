@@ -107,10 +107,10 @@ namespace MasterPlanProject.WebApi.Repository
 			}
 			string jwtTokenId = $"JTID{Guid.NewGuid()}";
 			string refreshToken = await CreateNewRefreshToken(Id, jwtTokenId);
-			TokenDTO response = GenerazioneToken(Id, Name, roles,  Email, jwtTokenId, refreshToken);
+			TokenDTO response = GenerazioneToken(Id, Name, roles, Email, jwtTokenId, refreshToken);
 			return response;
 		}
-		private TokenDTO GenerazioneToken(string Id, string Name, List<string> Roles,  
+		private TokenDTO GenerazioneToken(string Id, string Name, List<string> Roles,
 										  string email, string jwtTokenId, string refreshToken,
 										  string sesso = "maschio")
 		{
@@ -224,7 +224,7 @@ namespace MasterPlanProject.WebApi.Repository
 				return new TokenDTO();
 			}
 
-			if(exixstingRefreshToken.IsValid == false)
+			if (exixstingRefreshToken.IsValid == false)
 			{
 				List<RefreshTokens> chainRefreshTokens = dbCon.RefreshTokens.Where(t => t.UserId == exixstingRefreshToken.UserId &&
 																   t.JwtTokenId == exixstingRefreshToken.JwtTokenId).ToList();
@@ -286,7 +286,7 @@ namespace MasterPlanProject.WebApi.Repository
 			}
 			if (result == false)
 				return new TokenDTO();
-			TokenDTO newTokenDTO = GenerazioneToken(Id, Name, roles,Email , exixstingRefreshToken.JwtTokenId, newRefreshToken );
+			TokenDTO newTokenDTO = GenerazioneToken(Id, Name, roles, Email, exixstingRefreshToken.JwtTokenId, newRefreshToken);
 			return newTokenDTO;
 		}
 
@@ -304,7 +304,25 @@ namespace MasterPlanProject.WebApi.Repository
 			await dbCon.SaveChangesAsync();
 			return refreshToken.Refresh_Token;
 		}
-
+		public async Task RevokerefreshToken(TokenDTO tokenDTO)
+		{
+			RefreshTokens? exixstingRefreshToken = await dbCon.RefreshTokens.FirstOrDefaultAsync(_ => _.Refresh_Token == tokenDTO.RefreshToken);
+			if (exixstingRefreshToken == null)
+				return;
+			(bool IsSuccessful, string userId, string tokenId) tokenIsValid = GetAccessTokenData(tokenDTO.AccessToken);
+			if (tokenIsValid.IsSuccessful == false)
+			{
+				return;
+			}
+			List<RefreshTokens> chainRefreshTokens = dbCon.RefreshTokens.Where(t => t.UserId == exixstingRefreshToken.UserId &&
+																   t.JwtTokenId == exixstingRefreshToken.JwtTokenId).ToList();
+			foreach (RefreshTokens refToken in chainRefreshTokens)
+			{
+				refToken.IsValid = false;
+			}
+			dbCon.UpdateRange(chainRefreshTokens);
+			dbCon.SaveChanges();
+		}
 		private (bool IsSuccessful, string userId, string tokenId) GetAccessTokenData(string accessToken)
 		{
 			try
@@ -320,5 +338,7 @@ namespace MasterPlanProject.WebApi.Repository
 				return (false, null, null);
 			}
 		}
+
+
 	}
 }
