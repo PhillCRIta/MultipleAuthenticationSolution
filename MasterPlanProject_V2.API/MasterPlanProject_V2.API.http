@@ -17,12 +17,19 @@ Content-Type: application/json
   "username": "Liana",
   "password": "Liana2"
 }
+###REFRESH TOKEN
+POST {{rootUrl}}/api/UserAuth/refresh
+Content-Type: application/json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkxpYW5hIiwibmFtZWlkIjoiZmNkM2I0NGEtOTJmMy00OGQ0LTk2NzQtMGQ2MWM2ODAzYTUwIiwianRpIjoiSlRJRDA3ZmIwNGVkLWZjNjQtNDg1MC05ZjkyLWNiYjE0ZDY3MGYzMiIsInN1YiI6ImZjZDNiNDRhLTkyZjMtNDhkNC05Njc0LTBkNjFjNjgwM2E1MCIsInJvbGUiOiJjYXNhbGluZ2EiLCJnZW5kZXIiOiJtYXNjaGlvIiwiZW1haWwiOiJMaWFuYUBteWRvbWFpbi5jb20iLCJuYmYiOjE3MjkyNDU3MTYsImV4cCI6MTcyOTI0NTcyMywiaWF0IjoxNzI5MjQ1NzE2fQ.dpK87LtcVJbYvCSUupHwFA2SemQtqz3Wu6cgu75ogkU",
+    "refreshToken": "cbe5f161-27cf-43ba-b49e-b07ae4ab6984-997b6b6a-1777-407e-99bb-1bf3fca20a30"
+     }
 ###REGISTRAZIONE
 POST {{rootUrl}}/api/UserAuth/register
 Content-Type: application/json
 {
-  "name": "Baddy",
-  "username": "Baddy",
-  "password": "Baddy2",
+  "name": "pippo",
+  "username": "pippo",
+  "password": "pero",
   "role": "admin"
 }

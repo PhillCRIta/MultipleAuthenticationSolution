@@ -14,6 +14,7 @@ namespace MasterPlanProject_V2.MVC.Services
         public void ClearToken()
 		{
 			contextAccessor.HttpContext?.Response.Cookies.Delete(Constant.AccessTokenSession);
+			contextAccessor.HttpContext?.Response.Cookies.Delete(Constant.RefreshToken);
 		}
 
 		public TokenDTO? GetToken()
@@ -21,9 +22,11 @@ namespace MasterPlanProject_V2.MVC.Services
 			try
 			{
 				bool hasAccessToken = contextAccessor.HttpContext.Request.Cookies.TryGetValue(Constant.AccessTokenSession, out string accessToken);
+				bool hasRefreshToken = contextAccessor.HttpContext.Request.Cookies.TryGetValue(Constant.RefreshToken, out string refreshToken);
 				TokenDTO token = new()
 				{
-					AccessToken = accessToken
+					AccessToken = accessToken,
+					RefreshToken = refreshToken
 				};
 				return hasAccessToken ? token : null;
 			}
@@ -37,6 +40,7 @@ namespace MasterPlanProject_V2.MVC.Services
 		{
 			CookieOptions co = new CookieOptions { Expires = DateTime.UtcNow.AddDays(60) };
 			contextAccessor.HttpContext?.Response.Cookies.Append(Constant.AccessTokenSession, tokenDTO.AccessToken, co);
+			contextAccessor.HttpContext?.Response.Cookies.Append(Constant.RefreshToken, tokenDTO.RefreshToken, co);
 		}
 	}
 }

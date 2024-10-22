@@ -1,4 +1,6 @@
-﻿namespace MasterPlanProject.WebApi.Data
+﻿using MasterPlanProject_V2.API.Models;
+
+namespace MasterPlanProject.WebApi.Data
 {
 	public class MasterPlanDataDbContext : DbContext
 	{
@@ -6,6 +8,7 @@
 
 		public DbSet<LocalitaPuglia> LocalitaPuglia { get; set; }
 		public DbSet<LocalUsers> LocalUsers { get; set; }
+		public DbSet<RefreshTokens> RefreshTokens { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<LocalitaPuglia>().HasData(

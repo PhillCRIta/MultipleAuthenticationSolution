@@ -30,3 +30,4 @@ global using System.Net;
 global using System.Security.Claims;
 global using System.Text;
 global using System;
+global using System.ComponentModel.DataAnnotations;

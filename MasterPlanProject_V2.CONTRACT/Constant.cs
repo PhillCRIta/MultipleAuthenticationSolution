@@ -9,6 +9,7 @@ namespace ContractLibrary
 	public static class Constant
 	{
 		public static string AccessTokenSession { get; set; } = "JWTToken"; 
+		public static string RefreshToken { get; set; } = "RefreshToken"; 
 
 		public enum ApiType { GET, POST, PUT, DELETE }
 

@@ -1,3 +1,7 @@
+using MasterPlanProject_V2.API.Models;
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace MasterPlanProject.WebApi
 {
 	public class Program
@@ -6,7 +10,7 @@ namespace MasterPlanProject.WebApi
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			string typeAuth = builder.Configuration.GetValue<string>("TypeOfAuthentication:Type");
+			string typeAuth = builder.Configuration.GetValue<string>("TypeOfAuthentication:Type")!;
 			Console.WriteLine("TypeOfAuth: " + typeAuth);
 
 			// Add services to the container.
@@ -24,7 +28,7 @@ namespace MasterPlanProject.WebApi
 				if (builder.Environment.IsDevelopment())
 				{
 					optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
-								  .EnableSensitiveDataLogging() 
+								  .EnableSensitiveDataLogging()
 								  .EnableDetailedErrors();
 				}
 			});
@@ -35,7 +39,7 @@ namespace MasterPlanProject.WebApi
 				if (builder.Environment.IsDevelopment())
 				{
 					optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
-								  .EnableSensitiveDataLogging() 
+								  .EnableSensitiveDataLogging()
 								  .EnableDetailedErrors();
 				}
 			});
@@ -54,8 +58,8 @@ namespace MasterPlanProject.WebApi
 				{
 					Description = "Questa sicurezza è basata su JWT Token, usando lo schema Bearer." + System.Environment.NewLine +
 					"Inserisci Bearer [spazio] e il token restituito dall'api di login.",
-					Name = "Authorization", 
-					In = ParameterLocation.Header, 
+					Name = "Authorization",
+					In = ParameterLocation.Header,
 					Scheme = "Bearer"
 				});
 				opt.AddSecurityRequirement(new OpenApiSecurityRequirement()
@@ -103,7 +107,9 @@ namespace MasterPlanProject.WebApi
 					ValidateIssuerSigningKey = true,
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration.GetValue<string>("ApiSetting:Secret"))),
 					ValidateIssuer = false,
-					ValidateAudience = false
+					ValidateAudience = false,
+					//time validation
+					ClockSkew = TimeSpan.Zero
 				};
 				opt.Events = new JwtBearerEvents()
 				{
@@ -124,6 +130,18 @@ namespace MasterPlanProject.WebApi
 							Debug.WriteLine("URL: " + path);
 							Debug.WriteLine("Token: No access token provided\r\n");
 						}
+						return Task.CompletedTask;
+					},
+					OnAuthenticationFailed = fail =>
+					{
+						Console.WriteLine();
+						Debug.WriteLine("Failed authentication");
+						return Task.CompletedTask;
+					},
+					OnForbidden = forb =>
+					{
+						Console.WriteLine();
+						Debug.WriteLine("Forbidden authentication");
 						return Task.CompletedTask;
 					},
 					OnTokenValidated = ctx =>

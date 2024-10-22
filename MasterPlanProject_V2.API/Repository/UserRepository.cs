@@ -1,4 +1,7 @@
-﻿namespace MasterPlanProject.WebApi.Repository
+﻿using ContractLibrary;
+using MasterPlanProject_V2.API.Models;
+
+namespace MasterPlanProject.WebApi.Repository
 {
 	public class UserRepository : IUserRepository
 	{
@@ -102,16 +105,22 @@
 					AccessToken = ""
 				};
 			}
-			TokenDTO response = GenerazioneToken(Id, Name, roles, userDTO, Email);
+			string jwtTokenId = $"JTID{Guid.NewGuid()}";
+			string refreshToken = await CreateNewRefreshToken(Id, jwtTokenId);
+			TokenDTO response = GenerazioneToken(Id, Name, roles,  Email, jwtTokenId, refreshToken);
 			return response;
 		}
-		private TokenDTO GenerazioneToken(string Id, string Name, List<string> Roles, LocalUsersDTO userDTO, string email, string sesso = "maschio")
+		private TokenDTO GenerazioneToken(string Id, string Name, List<string> Roles,  
+										  string email, string jwtTokenId, string refreshToken,
+										  string sesso = "maschio")
 		{
 			Byte[] key = Encoding.ASCII.GetBytes(secret);
 			JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 			ClaimsIdentity ci = new();
 			ci.AddClaim(new Claim(ClaimTypes.Name, Name));
 			ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, Id));
+			ci.AddClaim(new Claim(JwtRegisteredClaimNames.Jti, jwtTokenId));
+			ci.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, Id));
 			foreach (string role in Roles)
 			{
 				ci.AddClaim(new Claim(ClaimTypes.Role, role));
@@ -121,15 +130,16 @@
 			genericClaims.Add(ClaimTypes.Email, email);
 			SecurityTokenDescriptor tokenDesriptor = new SecurityTokenDescriptor
 			{
-				Subject = ci, 
+				Subject = ci,
 				Claims = genericClaims,
-				Expires = DateTime.UtcNow.AddDays(1),
+				Expires = DateTime.UtcNow.AddMinutes(5),
 				SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 			};
 			SecurityToken token = tokenHandler.CreateToken(tokenDesriptor);
 			TokenDTO tokenDto = new TokenDTO()
 			{
-				AccessToken = tokenHandler.WriteToken(token)
+				AccessToken = tokenHandler.WriteToken(token),
+				RefreshToken = refreshToken
 			};
 			return tokenDto;
 		}
@@ -195,6 +205,120 @@
 					break;
 			}
 			return null;
+		}
+
+		public async Task<TokenDTO> RefreshAccessToken(TokenDTO tokenDto)
+		{
+			RefreshTokens exixstingRefreshToken = await dbCon.RefreshTokens.FirstOrDefaultAsync(t => t.Refresh_Token == tokenDto.RefreshToken);
+			if (exixstingRefreshToken == null)
+			{
+				return new TokenDTO();
+			}
+			(bool IsSuccessful, string userId, string tokenId) accessTokenData = GetAccessTokenData(tokenDto.AccessToken);
+			if (accessTokenData.IsSuccessful == false ||
+				accessTokenData.userId != exixstingRefreshToken.UserId ||
+				accessTokenData.tokenId != exixstingRefreshToken.JwtTokenId)
+			{
+				exixstingRefreshToken.IsValid = false;
+				dbCon.SaveChanges();
+				return new TokenDTO();
+			}
+
+			if(exixstingRefreshToken.IsValid == false)
+			{
+				List<RefreshTokens> chainRefreshTokens = dbCon.RefreshTokens.Where(t => t.UserId == exixstingRefreshToken.UserId &&
+																   t.JwtTokenId == exixstingRefreshToken.JwtTokenId).ToList();
+				foreach (RefreshTokens refToken in chainRefreshTokens)
+				{
+					refToken.IsValid = false;
+				}
+				dbCon.UpdateRange(chainRefreshTokens);
+				dbCon.SaveChanges();
+				return new TokenDTO();
+			}
+
+			if (exixstingRefreshToken.ExpiresAt < DateTime.UtcNow)
+			{
+				exixstingRefreshToken.IsValid = false;
+				dbCon.SaveChanges();
+				return new TokenDTO();
+			}
+
+			string newRefreshToken = await CreateNewRefreshToken(exixstingRefreshToken.UserId, exixstingRefreshToken.JwtTokenId);
+			exixstingRefreshToken.IsValid = false;
+			dbCon.SaveChanges();
+			bool result = true;
+			string Id = "";
+			string Name = "";
+			string Email = "";
+			List<string> roles = new();
+			switch (typeAuth)
+			{
+				case "BUILTIN":
+					LocalUsers user = dbCon.LocalUsers.FirstOrDefault(u => u.Username == exixstingRefreshToken.UserId);
+					if (user == null)
+					{
+						result = false;
+					}
+					else
+					{
+						Id = user.Id.ToString();
+						Name = user.Name.ToString();
+						roles.Add(user.Role);
+						result = true;
+					}
+					break;
+				case "IDENTITY":
+					ApplicationIdentityUser appUser = dbIdCon.ApplicationIdentityUsers.FirstOrDefault(u => u.Id == exixstingRefreshToken.UserId)!;
+					if (appUser == null)
+					{
+						result = false;
+					}
+					else
+					{
+						Id = appUser.Id.ToString();
+						Name = appUser.Name.ToString();
+						roles = (List<string>)await userManager.GetRolesAsync(appUser);
+						Email = appUser.Email + "@mydomain.com";
+						result = true;
+					}
+					break;
+			}
+			if (result == false)
+				return new TokenDTO();
+			TokenDTO newTokenDTO = GenerazioneToken(Id, Name, roles,Email , exixstingRefreshToken.JwtTokenId, newRefreshToken );
+			return newTokenDTO;
+		}
+
+		private async Task<string> CreateNewRefreshToken(string userId, string tokenId)
+		{
+			RefreshTokens refreshToken = new()
+			{
+				IsValid = true,
+				UserId = userId,
+				JwtTokenId = tokenId,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+				Refresh_Token = Guid.NewGuid() + "-" + Guid.NewGuid()
+			};
+			await dbCon.RefreshTokens.AddAsync(refreshToken);
+			await dbCon.SaveChangesAsync();
+			return refreshToken.Refresh_Token;
+		}
+
+		private (bool IsSuccessful, string userId, string tokenId) GetAccessTokenData(string accessToken)
+		{
+			try
+			{
+				JwtSecurityTokenHandler handler = new();
+				JwtSecurityToken jwt = handler.ReadJwtToken(accessToken);
+				string jwtTokenId = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)!.Value;
+				string userId = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub).Value;
+				return (true, userId, jwtTokenId);
+			}
+			catch (Exception)
+			{
+				return (false, null, null);
+			}
 		}
 	}
 }

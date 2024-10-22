@@ -1,4 +1,6 @@
-﻿namespace MasterPlanProject.WebApi.Controllers
+﻿using Microsoft.IdentityModel.Tokens;
+
+namespace MasterPlanProject.WebApi.Controllers
 {
 	[Route("api/UserAuth")]
 	[ApiController]
@@ -23,7 +25,7 @@
 			try
 			{
 				TokenDTO tokenDto = await userRepo.LoginAsync(model);
-				if (tokenDto  == null || string.IsNullOrEmpty(tokenDto.AccessToken))
+				if (tokenDto == null || string.IsNullOrEmpty(tokenDto.AccessToken))
 				{
 					ModelState.AddModelError("ListMessage", "Invalid credential2");
 					ModelState.AddModelError("ListMessage", "Messaggio2");
@@ -63,5 +65,31 @@
 			return Ok(response);
 		}
 
+		[HttpPost("refresh")]
+		public async Task<IActionResult> GetNewTokenFromRefreshToken([FromBody] TokenDTO tokenDto)
+		{
+			if (ModelState.IsValid)
+			{
+				TokenDTO tokenDTOResponse = await userRepo.RefreshAccessToken(tokenDto);
+				if (tokenDTOResponse == null || string.IsNullOrEmpty(tokenDTOResponse.AccessToken))
+				{
+					response.StatusCode = HttpStatusCode.BadRequest;
+					response.IsSucces = false;
+					response.ErrorMessages.Add("Token non valido");
+					return BadRequest(response);
+				}
+				response.StatusCode = HttpStatusCode.OK;
+				response.IsSucces = true;
+				response.Result = tokenDTOResponse;
+				return Ok(response);
+			}
+			else
+			{
+				response.StatusCode = HttpStatusCode.BadRequest;
+				response.IsSucces = false;
+				response.ErrorMessages.Add("Invalid input");
+				return BadRequest(response);
+			}
+		}
 	}
 }

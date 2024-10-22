@@ -27,6 +27,7 @@ namespace MasterPlanProject.Mvc.Controllers
 			if (loginResponse != null && loginResponse.IsSucces)
 			{
 				TokenDTO model = JsonConvert.DeserializeObject<TokenDTO>(Convert.ToString(loginResponse.Result));
+				
 				JwtSecurityTokenHandler handler = new();
 				JwtSecurityToken jwt = handler.ReadJwtToken(model.AccessToken);
 				
@@ -34,8 +35,6 @@ namespace MasterPlanProject.Mvc.Controllers
 				string userName = jwt.Claims.FirstOrDefault(c => c.Type == "unique_name").Value;
 
 				List<string> roles = jwt.Claims.Where(c => c.Type == "role").Select(c=>c.Value).ToList();
-
-				tokenProvider.SetToken(model);
 
 				ClaimsIdentity identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
 				identity.AddClaim(new Claim(ClaimTypes.Name, userName));
@@ -46,7 +45,8 @@ namespace MasterPlanProject.Mvc.Controllers
 				identity.AddClaim(new Claim(ClaimTypes.Email, email));
 				ClaimsPrincipal principal = new ClaimsPrincipal();
 				principal.AddIdentity(identity);
-
+				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+				
 				/* CLAIM > variabile che contiene una coppia CHIAVE-VALORE
 				 * CLAIMS IDENTITY > un gruppo di claim che raggruppano i dati di identità di un SOGETTO, ad esempio un dispositivo che fa l'accesso, o un utente
 				 * CLAIMS PRINCIPAL > un gruppo che contiene più contenitori ClaimsIDENTITY, ad esempio un c. Principal può contenere l'identity dell'utenza che ha fatto accesso
@@ -55,7 +55,8 @@ namespace MasterPlanProject.Mvc.Controllers
 				 * IDENTITIES > DOCUMENTI, Driver's License, Passport, Credit Card, Google Account, Facebook Account, RSA SecurID, Finger print, Facial recognition,
 				 * CLAIM > DATI SCRITTI SUL SINGOLO DOCUMENTO */
 
-				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+				tokenProvider.SetToken(model);
+
 				return RedirectToAction("Index", "Home");
 			}
 			else
