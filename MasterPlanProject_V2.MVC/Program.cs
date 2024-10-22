@@ -1,5 +1,6 @@
 using MasterPlanProject_V2.MVC.Services;
 using MasterPlanProject_V2.MVC.Services.IServices;
+using Microsoft.Net.Http.Headers;
 
 namespace MasterPlanProject.Mvc
 {
@@ -41,6 +42,88 @@ namespace MasterPlanProject.Mvc
 				opt.SlidingExpiration = true;
 				opt.LoginPath = "/auth/login";
 				opt.AccessDeniedPath = "/auth/accessdenied";
+				opt.Events = new CookieAuthenticationEvents()
+				{
+					OnValidatePrincipal = val =>
+					{
+						Debug.WriteLine("MVC-VALIDATE " + val.Principal);
+						return Task.CompletedTask;
+					},
+					OnSigningIn = X =>
+					{
+						Debug.WriteLine("MVC-SIGNIN " + X.Request);
+						return Task.CompletedTask;
+					},
+					OnSignedIn = X =>
+					{
+						Debug.WriteLine("MVC-SIGNED " + X.Request);
+						return Task.CompletedTask;
+					},
+					OnRedirectToLogin = context =>
+					{
+						Debug.WriteLine("MVC-TOLOGIN " + context.Request);
+						if (IsAjaxRequest(context.Request))
+						{
+							context.Response.Headers.Location = context.RedirectUri;
+							context.Response.StatusCode = 401;
+						}
+						else
+						{
+							context.Response.Redirect(context.RedirectUri);
+						}
+						return Task.CompletedTask;
+					},
+					OnCheckSlidingExpiration = X =>
+					{
+						Debug.WriteLine("MVC-SLIDINGEXPIRATION " + X.Request);
+						return Task.CompletedTask;
+					},
+					OnSigningOut = X =>
+					{
+						Debug.WriteLine("MVC-SIGNINGOUT " + X.Request);
+						return Task.CompletedTask;
+					},
+					OnRedirectToReturnUrl = context =>
+					{
+						Debug.WriteLine("MVC-REDIRECTTOURL " + context.Request);
+						if (IsAjaxRequest(context.Request))
+						{
+							context.Response.Headers.Location = context.RedirectUri;
+						}
+						else
+						{
+							context.Response.Redirect(context.RedirectUri);
+						}
+						return Task.CompletedTask;
+					},
+					OnRedirectToAccessDenied = context =>
+					{
+						Debug.WriteLine("MVC-REDIRECTTOACCESSDENID " + context.Request);
+						if (IsAjaxRequest(context.Request))
+						{
+							context.Response.Headers.Location = context.RedirectUri;
+							context.Response.StatusCode = 403;
+						}
+						else
+						{
+							context.Response.Redirect(context.RedirectUri);
+						}
+						return Task.CompletedTask;
+					},
+					OnRedirectToLogout = context =>
+					{
+						Debug.WriteLine("MVC-REDIRECTTOLOGOUT " + context.Request);
+						if (IsAjaxRequest(context.Request))
+						{
+							context.Response.Headers.Location = context.RedirectUri;
+						}
+						else
+						{
+							context.Response.Redirect(context.RedirectUri);
+						}
+						return Task.CompletedTask;
+					}
+				};
 			});
 
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -69,6 +152,11 @@ namespace MasterPlanProject.Mvc
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 
 			app.Run();
+		}
+		private static bool IsAjaxRequest(HttpRequest request)
+		{
+			return string.Equals(request.Query[HeaderNames.XRequestedWith], "XMLHttpRequest", StringComparison.Ordinal) ||
+				string.Equals(request.Headers.XRequestedWith, "XMLHttpRequest", StringComparison.Ordinal);
 		}
 	}
 }

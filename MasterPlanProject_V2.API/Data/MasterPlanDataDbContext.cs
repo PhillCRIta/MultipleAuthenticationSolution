@@ -19,6 +19,7 @@ namespace MasterPlanProject.WebApi.Data
 						Localita = "Porto Cesareo",
 						DataInserimento = new DateTime(1983, 9, 18)
 					});
+			modelBuilder.Entity<RefreshTokens>().Property(x => x.DataInserimento).HasDefaultValueSql<DateTime>("getdate()");
 		}
 
 		//COMANDI

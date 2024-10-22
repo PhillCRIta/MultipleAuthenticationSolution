@@ -10,5 +10,6 @@ namespace MasterPlanProject_V2.API.Models
         public string Refresh_Token { get; set; }
         public bool IsValid { get; set; }
         public DateTime ExpiresAt { get; set; }
+		public DateTime DataInserimento { get; set; }
     }
 }

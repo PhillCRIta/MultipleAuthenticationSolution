@@ -27,9 +27,9 @@ namespace MasterPlanProject.WebApi
 				optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("MPDbConnection"));
 				if (builder.Environment.IsDevelopment())
 				{
-					optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
+					/*optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
 								  .EnableSensitiveDataLogging()
-								  .EnableDetailedErrors();
+								  .EnableDetailedErrors();*/
 				}
 			});
 			//IDENTITY DB CONTEXT
@@ -117,45 +117,41 @@ namespace MasterPlanProject.WebApi
 					{
 						var token = msg?.Request.Headers.Authorization.ToString();
 						string path = msg?.Request.Path ?? "";
-						if (!string.IsNullOrEmpty(token))
-
-						{
-							Debug.WriteLine("Access token");
-							Debug.WriteLine($"URL: {path}");
-							Debug.WriteLine($"Token: {token}\r\n");
-						}
-						else
-						{
-							Debug.WriteLine("Access token");
-							Debug.WriteLine("URL: " + path);
-							Debug.WriteLine("Token: No access token provided\r\n");
-						}
+						Debug.WriteLine("API-ONMESSAGERECIVED: Url: " + path + " - Token: " + token);
+						//if (!string.IsNullOrEmpty(token))
+						//{
+						//	Debug.WriteLine("Access token");
+						//	Debug.WriteLine($"URL: {path}");
+						//	Debug.WriteLine($"Token: {token}\r\n");
+						//}
+						//else
+						//{
+						//	Debug.WriteLine("Access token");
+						//	Debug.WriteLine("URL: " + path);
+						//	Debug.WriteLine("Token: No access token provided\r\n");
+						//}
 						return Task.CompletedTask;
 					},
 					OnAuthenticationFailed = fail =>
 					{
-						Console.WriteLine();
-						Debug.WriteLine("Failed authentication");
+						Debug.WriteLine("API-Failed authentication - " + fail.Exception);
 						return Task.CompletedTask;
 					},
 					OnForbidden = forb =>
 					{
-						Console.WriteLine();
-						Debug.WriteLine("Forbidden authentication");
+						Debug.WriteLine("API-Forbidden authentication - " + forb.Response);
 						return Task.CompletedTask;
 					},
 					OnTokenValidated = ctx =>
 					{
-						Console.WriteLine();
-						Debug.WriteLine("Claims from the access token");
-						if (ctx?.Principal != null)
-						{
-							foreach (var claim in ctx.Principal.Claims)
-							{
-								Debug.WriteLine($"{claim.Type} - {claim.Value}");
-							}
-						}
-						Debug.WriteLine("");
+						Debug.WriteLine("API-TOKENVALIDATO");
+						//if (ctx?.Principal != null)
+						//{
+						//	foreach (var claim in ctx.Principal.Claims)
+						//	{
+						//		Debug.WriteLine($"{claim.Type} - {claim.Value}");
+						//	}
+						//}
 						return Task.CompletedTask;
 					}
 				};
