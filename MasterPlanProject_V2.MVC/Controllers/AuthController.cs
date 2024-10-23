@@ -21,20 +21,20 @@ namespace MasterPlanProject.Mvc.Controllers
 		}
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Login(LoginRequestDTO obj)
+		public async Task<IActionResult> Login(LoginRequestDTO obj, string returnUrl = null)
 		{
 			APIResponse loginResponse = await authService.LoginAsync<APIResponse>(obj);
 			if (loginResponse != null && loginResponse.IsSucces)
 			{
 				TokenDTO model = JsonConvert.DeserializeObject<TokenDTO>(Convert.ToString(loginResponse.Result));
-				
+
 				JwtSecurityTokenHandler handler = new();
 				JwtSecurityToken jwt = handler.ReadJwtToken(model.AccessToken);
-				
+
 				string email = jwt.Claims.FirstOrDefault(c => c.Type == "email").Value;
 				string userName = jwt.Claims.FirstOrDefault(c => c.Type == "unique_name").Value;
 
-				List<string> roles = jwt.Claims.Where(c => c.Type == "role").Select(c=>c.Value).ToList();
+				List<string> roles = jwt.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
 
 				ClaimsIdentity identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
 				identity.AddClaim(new Claim(ClaimTypes.Name, userName));
@@ -46,7 +46,7 @@ namespace MasterPlanProject.Mvc.Controllers
 				ClaimsPrincipal principal = new ClaimsPrincipal();
 				principal.AddIdentity(identity);
 				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-				
+
 				/* CLAIM > variabile che contiene una coppia CHIAVE-VALORE
 				 * CLAIMS IDENTITY > un gruppo di claim che raggruppano i dati di identità di un SOGETTO, ad esempio un dispositivo che fa l'accesso, o un utente
 				 * CLAIMS PRINCIPAL > un gruppo che contiene più contenitori ClaimsIDENTITY, ad esempio un c. Principal può contenere l'identity dell'utenza che ha fatto accesso
@@ -56,8 +56,10 @@ namespace MasterPlanProject.Mvc.Controllers
 				 * CLAIM > DATI SCRITTI SUL SINGOLO DOCUMENTO */
 
 				tokenProvider.SetToken(model);
-
-				return RedirectToAction("Index", "Home");
+				if (string.IsNullOrEmpty(returnUrl))
+					return RedirectToAction("Index", "Home");
+				else
+					return LocalRedirect(returnUrl);
 			}
 			else
 			{

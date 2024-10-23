@@ -1,5 +1,6 @@
 using MasterPlanProject_V2.MVC.Services;
 using MasterPlanProject_V2.MVC.Services.IServices;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
 namespace MasterPlanProject.Mvc
@@ -37,16 +38,18 @@ namespace MasterPlanProject.Mvc
 			.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 			.AddCookie(opt =>
 			{
+				opt.Cookie.Name = "AuthCookie";
 				opt.Cookie.HttpOnly = true;
-				opt.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-				opt.SlidingExpiration = true;
+				opt.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+				opt.Cookie.MaxAge = opt.ExpireTimeSpan; 
+				opt.SlidingExpiration = false;
 				opt.LoginPath = "/auth/login";
 				opt.AccessDeniedPath = "/auth/accessdenied";
 				opt.Events = new CookieAuthenticationEvents()
 				{
 					OnValidatePrincipal = val =>
 					{
-						Debug.WriteLine("MVC-VALIDATE " + val.Principal);
+						Debug.WriteLine(DateTime.Now + "MVC-VALIDATE " + val.Principal + "  " + val.Request);
 						return Task.CompletedTask;
 					},
 					OnSigningIn = X =>
@@ -56,12 +59,12 @@ namespace MasterPlanProject.Mvc
 					},
 					OnSignedIn = X =>
 					{
-						Debug.WriteLine("MVC-SIGNED " + X.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-SIGNED " + X.Request + "URI: " +X.Request);
 						return Task.CompletedTask;
 					},
 					OnRedirectToLogin = context =>
 					{
-						Debug.WriteLine("MVC-TOLOGIN " + context.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-TOLOGIN " + context.Request + " URI: " + context.RedirectUri);
 						if (IsAjaxRequest(context.Request))
 						{
 							context.Response.Headers.Location = context.RedirectUri;
@@ -75,17 +78,17 @@ namespace MasterPlanProject.Mvc
 					},
 					OnCheckSlidingExpiration = X =>
 					{
-						Debug.WriteLine("MVC-SLIDINGEXPIRATION " + X.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-SLIDINGEXPIRATION " + X.Request);
 						return Task.CompletedTask;
 					},
 					OnSigningOut = X =>
 					{
-						Debug.WriteLine("MVC-SIGNINGOUT " + X.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-SIGNINGOUT " + X.Request);
 						return Task.CompletedTask;
 					},
 					OnRedirectToReturnUrl = context =>
 					{
-						Debug.WriteLine("MVC-REDIRECTTOURL " + context.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-REDIRECTTOURL " + context.Request + " URI: " + context.RedirectUri);
 						if (IsAjaxRequest(context.Request))
 						{
 							context.Response.Headers.Location = context.RedirectUri;
@@ -98,7 +101,7 @@ namespace MasterPlanProject.Mvc
 					},
 					OnRedirectToAccessDenied = context =>
 					{
-						Debug.WriteLine("MVC-REDIRECTTOACCESSDENID " + context.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-REDIRECTTOACCESSDENID " + context.Request + "URI: "+ context.RedirectUri);
 						if (IsAjaxRequest(context.Request))
 						{
 							context.Response.Headers.Location = context.RedirectUri;
@@ -112,7 +115,7 @@ namespace MasterPlanProject.Mvc
 					},
 					OnRedirectToLogout = context =>
 					{
-						Debug.WriteLine("MVC-REDIRECTTOLOGOUT " + context.Request);
+						Debug.WriteLine(DateTime.Now + "MVC-REDIRECTTOLOGOUT " + context.Request + " URI: "+context.RedirectUri);
 						if (IsAjaxRequest(context.Request))
 						{
 							context.Response.Headers.Location = context.RedirectUri;

@@ -39,7 +39,7 @@ namespace MasterPlanProject.WebApi
 				if (builder.Environment.IsDevelopment())
 				{
 					optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
-								  .EnableSensitiveDataLogging()
+								  //.EnableSensitiveDataLogging()
 								  .EnableDetailedErrors();
 				}
 			});
