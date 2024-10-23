@@ -160,6 +160,6 @@ namespace MasterPlanProject.Mvc
 		{
 			return string.Equals(request.Query[HeaderNames.XRequestedWith], "XMLHttpRequest", StringComparison.Ordinal) ||
 				string.Equals(request.Headers.XRequestedWith, "XMLHttpRequest", StringComparison.Ordinal);
-		}
+		} 
 	}
 }
