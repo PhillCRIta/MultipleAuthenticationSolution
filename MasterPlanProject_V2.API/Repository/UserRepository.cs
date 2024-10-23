@@ -132,7 +132,7 @@ namespace MasterPlanProject.WebApi.Repository
 			{
 				Subject = ci,
 				Claims = genericClaims,
-				Expires = DateTime.UtcNow.AddMinutes(1),
+				Expires = DateTime.UtcNow.AddMinutes(10),
 				SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 			};
 			SecurityToken token = tokenHandler.CreateToken(tokenDesriptor);
@@ -297,7 +297,7 @@ namespace MasterPlanProject.WebApi.Repository
 				IsValid = true,
 				UserId = userId,
 				JwtTokenId = tokenId,
-				ExpiresAt = DateTime.UtcNow.AddMinutes(2),
+				ExpiresAt = DateTime.UtcNow.AddMinutes(60),
 				Refresh_Token = Guid.NewGuid() + "-" + Guid.NewGuid()
 			};
 			await dbCon.RefreshTokens.AddAsync(refreshToken);
